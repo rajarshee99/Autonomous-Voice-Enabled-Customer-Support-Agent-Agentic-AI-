@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Site logo">
+  <defs>
+    <linearGradient id="orangeArc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffb300"/>
+      <stop offset="100%" stop-color="#ff6a00"/>
+    </linearGradient>
+    <filter id="glowOrange" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glowWhite" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M166 321c-63-32-82-102-45-159 39-61 123-79 186-42 53 31 76 93 58 148-16 48-58 77-104 90l-57 74z"
+      stroke="url(#orangeArc)"
+      stroke-width="34"
+      filter="url(#glowOrange)"
+    />
+
+    <path
+      d="M80 246c18-43 53-71 95-80"
+      stroke="#ffffff"
+      stroke-width="28"
+      filter="url(#glowWhite)"
+    />
+    <path
+      d="M318 165c48-18 95-4 125 37"
+      stroke="#ffffff"
+      stroke-width="28"
+      filter="url(#glowWhite)"
+    />
+  </g>
+
+  <g fill="#ff9a0a" filter="url(#glowOrange)">
+    <circle cx="228" cy="226" r="8"/>
+    <circle cx="256" cy="226" r="8"/>
+    <circle cx="284" cy="226" r="8"/>
+  </g>
+</svg>

@@ -1,0 +1,15 @@
+{
+  "updated_at": "2026-05-09 00:35:33",
+  "query": "<frontend text input>",
+  "audio": "<frontend voice blob>",
+  "text_response": "<response from /query>",
+  "voice_transcription": "<response from /voice via voice_to_text.py>",
+  "error_detail": "<error message if any>",
+  "last_text_input": "",
+  "last_preprocessed_text": "",
+  "last_voice_text": "",
+  "last_validation_result": {},
+  "last_llm_answer": "",
+  "last_source_websites": [],
+  "websites_crawled": []
+}

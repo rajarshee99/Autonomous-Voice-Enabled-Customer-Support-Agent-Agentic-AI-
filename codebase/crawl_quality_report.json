@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "total_rows": 0,
+    "parse_errors": 0,
+    "status_counts": {},
+    "total_queries": 0,
+    "resolved_queries": 0,
+    "query_coverage_ratio": 0.0,
+    "unique_urls": 0,
+    "unique_useful_urls": 0,
+    "success_rows": 0,
+    "useful_success_rows": 0,
+    "useful_success_ratio": 0.0,
+    "duplicate_chunk_rows": 0,
+    "repeated_urls_count": 0
+  },
+  "unresolved_queries": [],
+  "top_repeated_urls": [],
+  "top_duplicate_chunks": [],
+  "query_reports": []
+}

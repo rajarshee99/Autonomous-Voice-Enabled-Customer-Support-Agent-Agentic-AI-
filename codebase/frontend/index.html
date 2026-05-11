@@ -1,0 +1,1252 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>AI Customer Support Agent</title>
+	<style>
+		@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+		:root {
+			--bg-0: #050505;
+			--bg-1: #0d0d0d;
+			--panel: rgba(10, 10, 10, 0.88);
+			--panel-strong: rgba(8, 8, 8, 0.95);
+			--panel-soft: rgba(255, 255, 255, 0.03);
+			--border: rgba(255, 255, 255, 0.1);
+			--border-soft: rgba(255, 255, 255, 0.08);
+			--text: #f5f5f5;
+			--muted: #9b9b9b;
+			--accent: #ff6900;
+			--accent-soft: rgba(255, 105, 0, 0.14);
+			--danger: #f87171;
+			--user-bubble: linear-gradient(145deg, #ff5e00, #ff7b1a);
+			--ai-bubble: #141414;
+			--shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
+			--shadow-md: 0 10px 24px rgba(0, 0, 0, 0.35);
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			font-family: "Space Grotesk", "Segoe UI", sans-serif;
+			color: var(--text);
+			background:
+				radial-gradient(120% 100% at 5% 5%, rgba(255, 105, 0, 0.08) 0%, transparent 45%),
+				radial-gradient(80% 80% at 100% 100%, rgba(255, 105, 0, 0.06) 0%, transparent 50%),
+				linear-gradient(160deg, var(--bg-0), var(--bg-1));
+			overflow: hidden;
+		}
+
+		.app-shell {
+			width: 100vw;
+			height: 100vh;
+			display: grid;
+			grid-template-rows: auto 1fr;
+			border: 1px solid var(--border);
+			box-shadow: var(--shadow-lg);
+			background: linear-gradient(180deg, rgba(8, 8, 8, 0.96), rgba(6, 6, 6, 0.98));
+		}
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			padding: 12px 16px;
+			border-bottom: 1px solid var(--border-soft);
+			background: rgba(10, 10, 10, 0.82);
+		}
+
+		.brand {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.brand-mark {
+			width: 28px;
+			height: 28px;
+			border-radius: 8px;
+			display: grid;
+			place-items: center;
+			background: rgba(255, 105, 0, 0.1);
+			border: 1px solid rgba(255, 105, 0, 0.45);
+			overflow: hidden;
+		}
+
+		.brand-logo {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+		}
+
+		.title-wrap h1 {
+			margin: 0;
+			font-size: 1.08rem;
+			font-weight: 600;
+		}
+
+		.title-wrap p {
+			margin: 3px 0 0;
+			font-size: 0.74rem;
+			color: var(--muted);
+		}
+
+		.header-right {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.status-pill {
+			font-size: 0.74rem;
+			color: #ffe7d6;
+			background: rgba(255, 105, 0, 0.12);
+			border: 1px solid rgba(255, 105, 0, 0.4);
+			padding: 7px 10px;
+			border-radius: 999px;
+			font-weight: 600;
+		}
+
+		.crawl-indicator {
+			display: inline-flex;
+			align-items: center;
+			gap: 7px;
+			padding: 7px 10px;
+			border-radius: 999px;
+			border: 1px solid rgba(255, 255, 255, 0.16);
+			background: rgba(255, 255, 255, 0.04);
+			font-size: 0.72rem;
+			color: #dcdcdc;
+		}
+
+		.crawl-pulse {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: var(--accent);
+			animation: pulse-soft 1.4s ease-in-out infinite;
+		}
+
+		.crawl-text {
+			text-transform: uppercase;
+			font-weight: 700;
+			letter-spacing: 0.6px;
+		}
+
+		.workspace {
+			min-height: 0;
+			padding: 12px;
+		}
+
+		.chat-shell {
+			height: 100%;
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 260px;
+			gap: 12px;
+			min-height: 0;
+		}
+
+		.conversation-panel {
+			min-height: 0;
+			display: grid;
+			grid-template-rows: auto minmax(0, 1fr) auto;
+			border: 1px solid var(--border-soft);
+			border-radius: 16px;
+			background: var(--panel);
+			box-shadow: var(--shadow-md);
+			overflow: hidden;
+		}
+
+		.chat-frame-head {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 10px;
+			padding: 12px 14px;
+			border-bottom: 1px solid var(--border-soft);
+			background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008));
+		}
+
+		.frame-label {
+			font-size: 0.7rem;
+			text-transform: uppercase;
+			letter-spacing: 0.95px;
+			font-weight: 700;
+			color: #efefef;
+		}
+
+		.frame-subtle {
+			font-size: 0.77rem;
+			color: var(--muted);
+		}
+
+		.chat-area {
+			padding: 14px;
+			overflow-y: auto;
+			scroll-behavior: smooth;
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		.chat-area::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		.chat-area::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 999px;
+		}
+
+		.message-row {
+			display: flex;
+			width: 100%;
+		}
+
+		.message-row.user {
+			justify-content: flex-end;
+		}
+
+		.message-row.ai {
+			justify-content: flex-start;
+			align-items: flex-end;
+			gap: 7px;
+		}
+
+		.ai-avatar {
+			width: 22px;
+			height: 22px;
+			flex: 0 0 auto;
+			border-radius: 999px;
+			border: 1px solid rgba(255, 135, 40, 0.5);
+			background: rgba(255, 106, 0, 0.1);
+			display: grid;
+			place-items: center;
+			overflow: hidden;
+			box-shadow: 0 0 9px rgba(255, 106, 0, 0.35);
+		}
+
+		.ai-avatar img {
+			width: 16px;
+			height: 16px;
+			object-fit: contain;
+			display: block;
+		}
+
+		.bubble {
+			max-width: min(72%, 760px);
+			border-radius: 12px;
+			padding: 10px 12px;
+			display: grid;
+			gap: 6px;
+			line-height: 1.42;
+			word-wrap: break-word;
+			box-shadow: var(--shadow-md);
+		}
+
+		.bubble .text {
+			white-space: pre-wrap;
+			font-size: 0.88rem;
+		}
+
+		.bubble .time {
+			font-size: 0.68rem;
+			opacity: 0.76;
+			justify-self: end;
+		}
+
+		.message-row.user .bubble {
+			background: var(--user-bubble);
+			color: #fff6ef;
+			border-bottom-right-radius: 5px;
+		}
+
+		.message-row.ai .bubble {
+			background: var(--ai-bubble);
+			border: 1px solid var(--border-soft);
+			color: #f3f3f3;
+			border-bottom-left-radius: 5px;
+		}
+
+		.thinking {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 0.86rem;
+			color: #c3c3c3;
+			padding: 7px 10px;
+			border-radius: 10px;
+			border: 1px dashed rgba(255, 255, 255, 0.2);
+			background: rgba(255, 255, 255, 0.02);
+		}
+
+		.dots {
+			display: inline-flex;
+			gap: 4px;
+		}
+
+		.dots span {
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: #ff964a;
+			animation: pulse 1s infinite ease-in-out;
+		}
+
+		.dots span:nth-child(2) {
+			animation-delay: 0.15s;
+		}
+
+		.dots span:nth-child(3) {
+			animation-delay: 0.3s;
+		}
+
+		.sources-strip {
+			padding: 8px 12px 10px;
+			border-top: 1px solid var(--border-soft);
+			background: rgba(255, 255, 255, 0.015);
+			display: grid;
+			gap: 7px;
+		}
+
+		.source-strip-head {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.source-strip-title {
+			font-size: 0.67rem;
+			text-transform: uppercase;
+			font-weight: 700;
+			letter-spacing: 0.8px;
+			color: #d9d9d9;
+		}
+
+		.sources-hint {
+			font-size: 0.7rem;
+			color: var(--muted);
+		}
+
+		.source-list {
+			display: flex;
+			gap: 6px;
+			overflow-x: auto;
+			padding-bottom: 2px;
+		}
+
+		.source-list::-webkit-scrollbar {
+			height: 6px;
+		}
+
+		.source-list::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 999px;
+		}
+
+		.source-chip {
+			display: inline-flex;
+			align-items: center;
+			gap: 7px;
+			white-space: nowrap;
+			font-size: 0.67rem;
+			color: #d5d5d5;
+			padding: 5px 8px;
+			border-radius: 999px;
+			border: 1px solid rgba(255, 255, 255, 0.14);
+			background: rgba(255, 255, 255, 0.03);
+		}
+
+		.source-glow-btn {
+			width: 9px;
+			height: 9px;
+			border-radius: 999px;
+			background: #ff6a00;
+			border: 1px solid rgba(255, 167, 111, 0.85);
+			box-shadow:
+				0 0 0 3px rgba(255, 106, 0, 0.16),
+				0 0 8px rgba(255, 106, 0, 0.85);
+			flex: 0 0 auto;
+		}
+
+		.source-empty {
+			font-size: 0.67rem;
+			color: var(--muted);
+			padding: 4px 1px;
+		}
+
+		.composer-panel {
+			display: grid;
+			grid-template-rows: auto auto 1fr;
+			gap: 10px;
+			padding: 12px;
+			border: 1px solid var(--border-soft);
+			border-radius: 16px;
+			background: var(--panel-strong);
+			box-shadow: var(--shadow-md);
+		}
+
+		.composer-top {
+			font-size: 0.74rem;
+			color: var(--muted);
+			letter-spacing: 0.2px;
+		}
+
+		textarea {
+			width: 100%;
+			min-height: 84px;
+			max-height: 160px;
+			resize: vertical;
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			border-radius: 10px;
+			padding: 10px;
+			font: inherit;
+			font-size: 0.86rem;
+			color: var(--text);
+			background: rgba(255, 255, 255, 0.02);
+			outline: none;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		textarea::placeholder {
+			color: #7f7f7f;
+		}
+
+		textarea:focus {
+			border-color: rgba(255, 105, 0, 0.6);
+			box-shadow: 0 0 0 3px rgba(255, 105, 0, 0.12);
+		}
+
+		.controls {
+			display: grid;
+			gap: 8px;
+		}
+
+		button {
+			border: 1px solid transparent;
+			border-radius: 10px;
+			padding: 10px 12px;
+			font: inherit;
+			font-size: 0.84rem;
+			font-weight: 600;
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			transition: transform 0.15s ease, opacity 0.2s ease;
+		}
+
+		button:hover {
+			transform: translateY(-1px);
+		}
+
+		button:active {
+			transform: translateY(0);
+		}
+
+		button:disabled {
+			cursor: not-allowed;
+			opacity: 0.6;
+			transform: none;
+		}
+
+		.btn-icon {
+			font-size: 0.68rem;
+			padding: 3px 6px;
+			border-radius: 999px;
+			text-transform: uppercase;
+			font-weight: 700;
+			letter-spacing: 0.3px;
+		}
+
+		.send-btn {
+			background: linear-gradient(145deg, #ff5f00, #ff7e1f);
+			color: #fff;
+			box-shadow: 0 8px 20px rgba(255, 105, 0, 0.24);
+		}
+
+		.send-btn .btn-icon {
+			background: rgba(0, 0, 0, 0.2);
+			color: #ffe6d2;
+		}
+
+		.mic-btn {
+			background: rgba(255, 255, 255, 0.03);
+			border-color: rgba(255, 255, 255, 0.12);
+			color: #e4e4e4;
+		}
+
+		.mic-btn .btn-icon {
+			background: rgba(255, 255, 255, 0.1);
+			color: #cfd2d8;
+		}
+
+		.mic-btn.recording {
+			background: rgba(248, 113, 113, 0.12);
+			color: #fee2e2;
+			border-color: rgba(248, 113, 113, 0.55);
+			animation: record-glow 1.2s infinite;
+		}
+
+		.mic-btn.recording .btn-icon {
+			background: rgba(248, 113, 113, 0.2);
+			color: #fff1f1;
+		}
+
+		.loading-btn {
+			width: 100%;
+			background: rgba(255, 106, 0, 0.14);
+			border-color: rgba(255, 130, 42, 0.56);
+			color: #ffe7d2;
+			display: none;
+			flex-direction: column;
+			align-items: stretch;
+			gap: 7px;
+			padding: 10px 12px;
+			cursor: default;
+			box-shadow: 0 8px 20px rgba(255, 106, 0, 0.2);
+		}
+
+		.loading-btn:disabled {
+			opacity: 1;
+			transform: none;
+		}
+
+		.loading-head {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 10px;
+			font-size: 0.8rem;
+		}
+
+		.loading-percent {
+			font-weight: 700;
+		}
+
+		.loading-eta {
+			color: #ffc8a0;
+			font-size: 0.74rem;
+			line-height: 1.25;
+		}
+
+		.loading-track {
+			display: block;
+			width: 100%;
+			height: 5px;
+			border-radius: 999px;
+			background: rgba(255, 145, 64, 0.25);
+			overflow: hidden;
+		}
+
+		.loading-fill {
+			display: block;
+			width: 0%;
+			height: 100%;
+			background: linear-gradient(90deg, #ff5f00, #ff9a3d);
+			border-radius: inherit;
+			transition: width 0.28s ease;
+		}
+
+		.voice-status {
+			font-size: 0.72rem;
+			color: var(--muted);
+			text-align: center;
+		}
+
+		.error {
+			font-size: 0.78rem;
+			color: var(--danger);
+			min-height: 1.1em;
+			text-align: center;
+		}
+
+		@keyframes pulse {
+			0%,
+			80%,
+			100% {
+				transform: scale(0.7);
+				opacity: 0.6;
+			}
+			40% {
+				transform: scale(1);
+				opacity: 1;
+			}
+		}
+
+		@keyframes pulse-soft {
+			0%,
+			100% {
+				opacity: 1;
+			}
+			50% {
+				opacity: 0.35;
+			}
+		}
+
+		@keyframes record-glow {
+			0%,
+			100% {
+				box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.24);
+			}
+			50% {
+				box-shadow: 0 0 0 8px rgba(248, 113, 113, 0);
+			}
+		}
+
+		@media (max-width: 900px) {
+			.chat-shell {
+				grid-template-columns: 1fr;
+			}
+
+			.composer-panel {
+				grid-template-rows: auto auto auto;
+			}
+
+			.bubble {
+				max-width: 88%;
+			}
+		}
+
+		@media (max-width: 640px) {
+			.header {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+
+			.header-right {
+				width: 100%;
+				justify-content: flex-start;
+				flex-wrap: wrap;
+			}
+
+			.workspace {
+				padding: 10px;
+			}
+
+			.chat-frame-head {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main class="app-shell" aria-label="AI Customer Support Agent">
+		<header class="header">
+			<div class="brand">
+				<div class="brand-mark" aria-hidden="true"><img src="/logo?v=1" alt="" class="brand-logo" /></div>
+				<div class="title-wrap">
+					<h1>AI Customer Support Agent</h1>
+					<p>Unified text and voice support conversations in one workspace.</p>
+				</div>
+			</div>
+			<div class="header-right">
+				<div id="crawlIndicator" class="crawl-indicator" style="display: none;">
+					<span class="crawl-pulse"></span>
+					<span id="crawlStatus" class="crawl-text">Fetching</span>
+				</div>
+				<div id="statusPill" class="status-pill" aria-live="polite">Online</div>
+			</div>
+		</header>
+
+		<div class="workspace">
+			<section class="chat-shell" aria-label="Conversation workspace">
+				<section class="conversation-panel">
+					<div class="chat-frame-head">
+						<div>
+							<div class="frame-label">Conversation</div>
+							<div class="frame-subtle">Large workspace view for message history and responses.</div>
+						</div>
+					</div>
+
+					<section id="chatArea" class="chat-area" aria-live="polite" aria-label="Chat messages">
+						<div class="message-row ai">
+							<span class="ai-avatar" aria-hidden="true"><img src="/logo?v=1" alt="" /></span>
+							<article class="bubble">
+								<div class="text">Hello! I can help with your support questions. Type a message or tap voice to begin.</div>
+								<div class="time">Now</div>
+							</article>
+						</div>
+					</section>
+
+					<section class="sources-strip" aria-label="Sources">
+						<div class="source-strip-head">
+							<span class="source-strip-title">Sources</span>
+							<span id="sourcesHint" class="sources-hint">No crawled sources yet.</span>
+						</div>
+						<div id="sourceList" class="source-list" aria-live="polite">
+							<div class="source-empty">No crawled websites yet.</div>
+						</div>
+					</section>
+				</section>
+
+				<section class="composer-panel" aria-label="Message composer">
+					<div class="composer-top">Type your message here...</div>
+					<textarea id="userInput" placeholder="Type your message here..."></textarea>
+
+					<div class="controls">
+						<button id="sendBtn" class="send-btn" type="button">
+							<span class="btn-icon">Send</span>
+							<span>Send Message</span>
+						</button>
+						<button id="micBtn" class="mic-btn" type="button" aria-pressed="false">
+							<span class="btn-icon">Mic</span>
+							<span id="micBtnLabel">Start Voice</span>
+						</button>
+						<button id="loadingBtn" class="loading-btn" type="button" disabled aria-live="polite">
+							<span class="loading-head">
+								<span id="loadingStage">Preparing request</span>
+								<span id="loadingPercent" class="loading-percent">0%</span>
+							</span>
+							<span id="loadingEta" class="loading-eta">Estimating time left...</span>
+							<span class="loading-track" aria-hidden="true"><span id="loadingFill" class="loading-fill"></span></span>
+						</button>
+						<div id="voiceHint" class="voice-status">Voice status: idle</div>
+						<div id="errorText" class="error" role="alert"></div>
+					</div>
+				</section>
+			</section>
+		</div>
+	</main>
+
+	<script>
+		const LOGO_URL = "/logo?v=1";
+		const chatArea = document.getElementById("chatArea");
+		const userInput = document.getElementById("userInput");
+		const sendBtn = document.getElementById("sendBtn");
+		const micBtn = document.getElementById("micBtn");
+		const micBtnLabel = document.getElementById("micBtnLabel");
+		const statusPill = document.getElementById("statusPill");
+		const sourceList = document.getElementById("sourceList");
+		const sourcesHint = document.getElementById("sourcesHint");
+		const voiceHint = document.getElementById("voiceHint");
+		const errorText = document.getElementById("errorText");
+		const loadingBtn = document.getElementById("loadingBtn");
+		const loadingStage = document.getElementById("loadingStage");
+		const loadingPercent = document.getElementById("loadingPercent");
+		const loadingEta = document.getElementById("loadingEta");
+		const loadingFill = document.getElementById("loadingFill");
+
+		let isProcessing = false;
+		let mediaRecorder = null;
+		let audioChunks = [];
+		let isRecording = false;
+		let recordingTimeout = null;
+		let latestLivePayload = null;
+		let loadingInterval = null;
+		let loadingProgressValue = 0;
+		let loadingStartedAt = 0;
+		let loadingHideTimeout = null;
+
+		function nowTimeLabel() {
+			return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+		}
+
+		function autoScroll() {
+			chatArea.scrollTop = chatArea.scrollHeight;
+		}
+
+		function addMessage(sender, text) {
+			const row = document.createElement("div");
+			row.className = `message-row ${sender}`;
+
+			const bubble = document.createElement("article");
+			bubble.className = "bubble";
+
+			if (sender === "ai") {
+				const avatar = document.createElement("span");
+				avatar.className = "ai-avatar";
+				avatar.setAttribute("aria-hidden", "true");
+				avatar.innerHTML = `<img src="${LOGO_URL}" alt="" />`;
+				row.appendChild(avatar);
+			}
+
+			const textDiv = document.createElement("div");
+			textDiv.className = "text";
+			textDiv.textContent = text;
+
+			const timeDiv = document.createElement("div");
+			timeDiv.className = "time";
+			timeDiv.textContent = nowTimeLabel();
+
+			bubble.appendChild(textDiv);
+			bubble.appendChild(timeDiv);
+			row.appendChild(bubble);
+			chatArea.appendChild(row);
+
+			autoScroll();
+		}
+
+		function buildValidationDisplayText(data) {
+			const baseMessage = data.display_message || data.follow_up_question || data.message || "I have updated the query state.";
+			const questions = Array.isArray(data.top_level_questions) ? data.top_level_questions : [];
+			if (!questions.length) {
+				return baseMessage;
+			}
+
+			const questionText = questions.map((question, index) => `${index + 1}. ${question}`).join("\n");
+			return `${baseMessage}\n\n${questionText}`;
+		}
+
+		function buildAssistantReplyText(data) {
+			if (data && typeof data.llm_answer === "string" && data.llm_answer.trim()) {
+				const websites = Array.isArray(data.source_websites) ? data.source_websites.filter(Boolean) : [];
+				if (websites.length) {
+					return `${data.llm_answer.trim()}\n\nSources: ${websites.join(", ")}`;
+				}
+				return data.llm_answer.trim();
+			}
+
+			if (data && typeof data.answer === "string" && data.answer.trim()) {
+				return data.answer.trim();
+			}
+
+			return buildValidationDisplayText(data || {});
+		}
+
+		function showThinking() {
+			const wrapper = document.createElement("div");
+			wrapper.className = "message-row ai";
+			wrapper.id = "thinkingRow";
+			wrapper.innerHTML = `
+				<div class="thinking" aria-label="AI is thinking">
+					Thinking
+					<span class="dots"><span></span><span></span><span></span></span>
+				</div>
+			`;
+			chatArea.appendChild(wrapper);
+			autoScroll();
+		}
+
+		function hideThinking() {
+			const thinkingRow = document.getElementById("thinkingRow");
+			if (thinkingRow) thinkingRow.remove();
+		}
+
+		function setError(message) {
+			errorText.textContent = message || "";
+		}
+
+		function deriveLoadingMetrics() {
+			const payload = latestLivePayload || {};
+			const crawledCount = Array.isArray(payload.websites_crawled) ? payload.websites_crawled.filter(Boolean).length : 0;
+
+			if (payload.is_crawling) {
+				const minPercent = 48 + Math.min(30, crawledCount * 5);
+				return {
+					stage: payload.current_website ? "Crawling websites" : "Starting crawl",
+					minPercent,
+					maxPercent: 92,
+					step: 1.1
+				};
+			}
+
+			if (isProcessing) {
+				return {
+					stage: "Generating answer",
+					minPercent: 18,
+					maxPercent: 96,
+					step: 0.9
+				};
+			}
+
+			return {
+				stage: "Preparing request",
+				minPercent: 0,
+				maxPercent: 100,
+				step: 0
+			};
+		}
+
+		function formatEta(progress, startedAt) {
+			if (progress >= 99) {
+				return "Wrapping up...";
+			}
+			if (progress <= 2 || !startedAt) {
+				return "Estimating time left...";
+			}
+
+			const elapsedMs = Date.now() - startedAt;
+			const ratio = progress / 100;
+			const totalMs = elapsedMs / ratio;
+			const remainingMs = totalMs - elapsedMs;
+			if (!Number.isFinite(remainingMs) || remainingMs < 0) {
+				return "Estimating time left...";
+			}
+
+			const seconds = Math.max(1, Math.ceil(remainingMs / 1000));
+			return `About ${seconds}s left`;
+		}
+
+		function paintLoading(stage, progress) {
+			const safeProgress = Math.max(0, Math.min(100, progress));
+			loadingProgressValue = safeProgress;
+			loadingStage.textContent = stage;
+			loadingPercent.textContent = `${Math.round(safeProgress)}%`;
+			loadingEta.textContent = formatEta(safeProgress, loadingStartedAt);
+			loadingFill.style.width = `${safeProgress}%`;
+		}
+
+		function showLoadingButton(initialStage = "Preparing request") {
+			if (loadingHideTimeout) {
+				clearTimeout(loadingHideTimeout);
+				loadingHideTimeout = null;
+			}
+			loadingBtn.style.display = "inline-flex";
+			loadingBtn.setAttribute("aria-hidden", "false");
+			loadingStartedAt = Date.now();
+			paintLoading(initialStage, 2);
+
+			if (loadingInterval) {
+				clearInterval(loadingInterval);
+			}
+			loadingInterval = setInterval(() => {
+				if (!isProcessing) return;
+				const metrics = deriveLoadingMetrics();
+				const nextValue = Math.max(loadingProgressValue + metrics.step, metrics.minPercent);
+				paintLoading(metrics.stage, Math.min(metrics.maxPercent, nextValue));
+			}, 450);
+		}
+
+		function hideLoadingButton() {
+			if (loadingInterval) {
+				clearInterval(loadingInterval);
+				loadingInterval = null;
+			}
+			paintLoading("Answer ready", 100);
+			loadingHideTimeout = setTimeout(() => {
+				loadingBtn.style.display = "none";
+				loadingBtn.setAttribute("aria-hidden", "true");
+				paintLoading("Preparing request", 0);
+				loadingHideTimeout = null;
+			}, 420);
+		}
+
+		function setUIBusy(busy, statusText = "Thinking...", initialStage = "Preparing request") {
+			isProcessing = busy;
+			userInput.disabled = busy;
+			sendBtn.disabled = busy;
+			micBtn.disabled = busy || isRecording;
+			statusPill.textContent = busy ? statusText : "Online";
+			if (busy) {
+				showLoadingButton(initialStage);
+			} else {
+				hideLoadingButton();
+			}
+		}
+
+		function renderSourceList(websites) {
+			const values = Array.isArray(websites) ? websites.filter(Boolean) : [];
+			sourceList.innerHTML = "";
+
+			if (!values.length) {
+				const empty = document.createElement("div");
+				empty.className = "source-empty";
+				empty.textContent = "No crawled websites yet.";
+				sourceList.appendChild(empty);
+				return;
+			}
+
+			values.forEach((website) => {
+				const chip = document.createElement("span");
+				chip.className = "source-chip";
+				chip.textContent = website;
+				const glow = document.createElement("span");
+				glow.className = "source-glow-btn";
+				glow.setAttribute("aria-hidden", "true");
+				chip.appendChild(glow);
+				sourceList.appendChild(chip);
+			});
+		}
+
+		async function refreshLiveSources() {
+			try {
+				const response = await fetch("/live");
+				if (!response.ok) return;
+				const payload = await response.json();
+				latestLivePayload = payload;
+
+				const crawlIndicator = document.getElementById("crawlIndicator");
+				const crawlStatus = document.getElementById("crawlStatus");
+				const sourceTrail = Array.isArray(payload.last_source_websites) ? payload.last_source_websites.filter(Boolean) : [];
+				const websitesCrawled = Array.isArray(payload.websites_crawled) ? payload.websites_crawled.filter(Boolean) : [];
+
+				if (payload.is_crawling) {
+					crawlIndicator.style.display = "inline-flex";
+					if (payload.current_website) {
+						crawlStatus.textContent = `Fetching ${payload.current_website}`;
+						sourcesHint.textContent = `Crawling now: ${payload.current_website}`;
+					} else {
+						crawlStatus.textContent = "Starting fetch";
+						sourcesHint.textContent = "Crawling websites...";
+					}
+				} else {
+					crawlIndicator.style.display = "none";
+					sourcesHint.textContent = sourceTrail.length
+						? `Answer sources: ${sourceTrail.length} site${sourceTrail.length > 1 ? "s" : ""}`
+						: "No crawled sources yet.";
+				}
+
+				renderSourceList(websitesCrawled.length ? websitesCrawled : sourceTrail);
+				if (isProcessing) {
+					const metrics = deriveLoadingMetrics();
+					const boostedProgress = Math.max(loadingProgressValue, metrics.minPercent);
+					paintLoading(metrics.stage, Math.min(metrics.maxPercent, boostedProgress));
+				}
+			} catch (error) {
+				// Keep the UI stable if live state polling fails temporarily.
+			}
+		}
+
+		function getMicrophoneErrorMessage(err) {
+			const name = err && err.name ? err.name : "UnknownError";
+
+			if (!window.isSecureContext) {
+				return "Microphone requires a secure origin (https:// or localhost).";
+			}
+
+			switch (name) {
+				case "NotAllowedError":
+				case "SecurityError":
+					return "Microphone permission was denied. Enable mic access in browser site settings.";
+				case "NotFoundError":
+				case "DevicesNotFoundError":
+					return "No microphone was found. Connect or enable an input device.";
+				case "NotReadableError":
+				case "TrackStartError":
+					return "Microphone is busy or blocked by another app. Close other apps and try again.";
+				case "OverconstrainedError":
+				case "ConstraintNotSatisfiedError":
+					return "Requested audio constraints are not supported on this device.";
+				case "AbortError":
+					return "Microphone startup was interrupted. Please try again.";
+				case "TypeError":
+					return "Audio capture settings are invalid for this browser.";
+				default:
+					return "Microphone access failed. Check browser permission, device availability, and secure origin.";
+			}
+		}
+
+		async function callQueryAPI(queryText) {
+			const response = await fetch("/query", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ query: queryText })
+			});
+
+			if (!response.ok) {
+				throw new Error(`Text API failed with status ${response.status}`);
+			}
+
+			return response.json();
+		}
+
+		async function callVoiceAPI(audioBlob) {
+			const formData = new FormData();
+			formData.append("audio", audioBlob, "voice-input.webm");
+
+			const response = await fetch("/voice", {
+				method: "POST",
+				body: formData
+			});
+
+			if (!response.ok) {
+				let message = `Voice API failed with status ${response.status}`;
+				try {
+					const errorPayload = await response.json();
+					if (errorPayload && errorPayload.detail) {
+						message = errorPayload.detail;
+					}
+				} catch (error) {
+					// Keep default message when server does not return JSON.
+				}
+				throw new Error(message);
+			}
+
+			return response.json();
+		}
+
+		async function handleTextSend() {
+			const inputText = userInput.value.trim();
+			if (!inputText || isProcessing) return;
+
+			setError("");
+			addMessage("user", inputText);
+			userInput.value = "";
+			setUIBusy(true, "Thinking...", "Validating question");
+			showThinking();
+
+			try {
+				const data = await callQueryAPI(inputText);
+				hideThinking();
+				addMessage("ai", buildAssistantReplyText(data));
+			} catch (err) {
+				hideThinking();
+				addMessage("ai", "Sorry, I could not process your message right now.");
+				setError(err.message || "Unexpected text request error.");
+			} finally {
+				setUIBusy(false);
+				userInput.focus();
+			}
+		}
+
+		function stopRecordingIfActive() {
+			if (mediaRecorder && mediaRecorder.state === "recording") {
+				mediaRecorder.stop();
+			}
+			if (recordingTimeout) {
+				clearTimeout(recordingTimeout);
+				recordingTimeout = null;
+			}
+		}
+
+		async function startVoiceRecording() {
+			if (isProcessing || isRecording) return;
+
+			if (!window.isSecureContext) {
+				setError("Microphone requires a secure origin (https:// or localhost).");
+				return;
+			}
+
+			if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+				setError("Your browser does not support microphone recording.");
+				return;
+			}
+
+			setError("");
+			try {
+				const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+				if (typeof MediaRecorder === "undefined") {
+					stream.getTracks().forEach((track) => track.stop());
+					setError("This browser cannot record audio with MediaRecorder.");
+					return;
+				}
+
+				audioChunks = [];
+				mediaRecorder = new MediaRecorder(stream);
+
+				mediaRecorder.ondataavailable = (event) => {
+					if (event.data && event.data.size > 0) {
+						audioChunks.push(event.data);
+					}
+				};
+
+				mediaRecorder.onstop = async () => {
+					stream.getTracks().forEach((track) => track.stop());
+					isRecording = false;
+					micBtn.classList.remove("recording");
+					micBtn.setAttribute("aria-pressed", "false");
+					micBtnLabel.textContent = "Start Voice";
+					voiceHint.textContent = "Voice status: processing recording";
+
+					if (!audioChunks.length) {
+						voiceHint.textContent = "Voice status: idle";
+						setError("No audio was captured.");
+						return;
+					}
+
+					const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+					addMessage("user", "Voice message sent");
+					setUIBusy(true, "Processing voice...", "Transcribing voice");
+					showThinking();
+
+					try {
+						const data = await callVoiceAPI(audioBlob);
+						hideThinking();
+						addMessage("ai", data.text || "I received your voice input, but no response text was returned.");
+						voiceHint.textContent = "Voice status: idle";
+					} catch (err) {
+						hideThinking();
+						addMessage("ai", "Sorry, I could not process your voice message right now.");
+						setError(err.message || "Unexpected voice request error.");
+						voiceHint.textContent = "Voice status: idle";
+					} finally {
+						setUIBusy(false);
+					}
+				};
+
+				mediaRecorder.start();
+				isRecording = true;
+				micBtn.classList.add("recording");
+				micBtn.setAttribute("aria-pressed", "true");
+				micBtnLabel.textContent = "Stop Voice";
+				voiceHint.textContent = "Voice status: listening...";
+				statusPill.textContent = "Listening...";
+				micBtn.disabled = false;
+				sendBtn.disabled = true;
+				userInput.disabled = true;
+
+				recordingTimeout = setTimeout(() => {
+					stopRecordingIfActive();
+				}, 7000);
+			} catch (err) {
+				isRecording = false;
+				setError(getMicrophoneErrorMessage(err));
+				voiceHint.textContent = "Voice status: idle";
+				statusPill.textContent = "Online";
+			}
+		}
+
+		function toggleVoiceRecording() {
+			if (isRecording) {
+				voiceHint.textContent = "Voice status: stopping...";
+				stopRecordingIfActive();
+				return;
+			}
+			startVoiceRecording();
+		}
+
+		let hasFlushedOnExit = false;
+
+		function flushCrawlerResultsOnExit() {
+			if (hasFlushedOnExit) return;
+			hasFlushedOnExit = true;
+
+			try {
+				if (navigator.sendBeacon) {
+					navigator.sendBeacon("/flush-crawler-results", new Blob(["flush=1"], { type: "text/plain" }));
+				} else {
+					fetch("/flush-crawler-results", {
+						method: "POST",
+						keepalive: true,
+					}).catch(() => {});
+				}
+			} catch (error) {
+				// Ignore unload-time errors to avoid interrupting page close.
+			}
+		}
+
+		sendBtn.addEventListener("click", handleTextSend);
+
+		userInput.addEventListener("keydown", (event) => {
+			if (event.key === "Enter" && !event.shiftKey) {
+				event.preventDefault();
+				handleTextSend();
+			}
+		});
+
+		micBtn.addEventListener("click", toggleVoiceRecording);
+		window.addEventListener("pagehide", flushCrawlerResultsOnExit);
+		window.addEventListener("beforeunload", flushCrawlerResultsOnExit);
+
+		refreshLiveSources();
+		setInterval(refreshLiveSources, 1000);
+		autoScroll();
+	</script>
+</body>
+</html>
+
