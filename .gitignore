@@ -1,0 +1,13 @@
+.env
+venv/
+__pycache__/
+*.jasonl
+FRONTEND_LIVE_OUTPUT.json
+FRONTEND_LIVE_OUTPUT.md
+chunker.log
+second_layer_chunker.log
+.chunking_state.json
+.stop_crawl
+crawl_quality_report.json
+README.txt
+*.bkp
